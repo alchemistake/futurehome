@@ -1,3 +1,36 @@
-<p>
-  tweets works!
-</p>
+<div class="tweets-container">
+  <nz-table #tweetTable [nzData]="tweets">
+    <thead>
+    <tr>
+      <th nzShowExpand></th>
+      <th>Tweet</th>
+      <th>User</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <ng-template ngFor let-data [ngForOf]="tweetTable.data">
+      <tr>
+        <td nzShowExpand [(nzExpand)]="mapOfExpandData[data.id]"></td>
+        <td>{{ data.text }}</td>
+        <td>@{{ data.user }}</td>
+        <td>
+          <a (click)="retweet(data.id)" [class.not-active]="data.retweeted">Retweet</a>
+          <nz-divider nzType="vertical"></nz-divider>
+          <a (click)="favorite(data.id)" [class.not-active]="data.favorited">Favorite</a>
+        </td>
+      </tr>
+      <tr [nzExpand]="mapOfExpandData[data.id]">
+        <td></td>
+        <td colspan="3">
+          <b>Language:</b> {{ data.lang }}<br>
+          <b>Location:</b> {{ data.place ? data.place : '-' }}<br>
+          <b>Retweet Count:</b> {{ data.retweet_count }}<br>
+          <b>Favorite Count:</b> {{ data.favorite_count }}<br>
+          <b>Created At:</b> {{ data.created_at }}
+        </td>
+      </tr>
+    </ng-template>
+    </tbody>
+  </nz-table>
+</div>

@@ -2,12 +2,14 @@ from datetime import datetime
 
 from django.db.models import Count, F
 from rest_framework import status
+from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import TweetInteractionSerializer
+from admin_panel_api.auth import CsrfExemptSessionAuthentication
 from .collector import TweetCollector
-from .models import Tweet, User
+from .models import Tweet
+from .serializers import TweetInteractionSerializer
 
 
 class TweetAPIView(APIView):
@@ -19,25 +21,17 @@ class TweetAPIView(APIView):
         tweets = self.tweet_collector.get_tweets()
 
         for tweet in tweets:
-            user = User(id=tweet['user']['id_str'],
-                        screen_name=tweet['user']['screen_name'],
-                        name=tweet['user']['name'],
-                        url=tweet['user']['url'])
-            user.save()
-
             row = Tweet(id=tweet['id_str'],
                         text=tweet['text'],
                         lang=tweet['lang'],
-                        favorited=tweet['favorited'],
-                        retweeted=tweet['retweeted'],
                         retweet_count=tweet['retweet_count'],
                         favorite_count=tweet['favorite_count'],
                         created_at=datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S +0000 %Y'),
                         place=getattr(tweet['place'], 'country', None),
-                        user=user)
+                        user=tweet['user']['screen_name'])
             row.save()
 
-        return Response({'tweets': tweets})
+        return Response({'tweets': Tweet.objects.values()})
 
 
 class DashboardAPIView(APIView):
@@ -52,6 +46,8 @@ class DashboardAPIView(APIView):
 
 
 class RetweetAPIView(APIView):
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.tweet_collector = TweetCollector.get_instance()
@@ -67,12 +63,13 @@ class RetweetAPIView(APIView):
 
 
 class FavoriteAPIView(APIView):
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.tweet_collector = TweetCollector.get_instance()
 
     def post(self, request):
-        print(request)
         serializer = TweetInteractionSerializer(data=request.data)
 
         if serializer.is_valid():
