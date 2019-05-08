@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
 
 @Component({
   selector: 'app-root',
@@ -7,15 +6,10 @@ import {HttpClient} from "@angular/common/http";
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  tweets: any[];
-
-  constructor(private _http: HttpClient) {
+  constructor() {
   }
 
 
   ngOnInit(): void {
-    this._http.get('/api/tweet').subscribe((resp: any) => {
-      this.tweets = resp.tweets;
-    });
   }
 }

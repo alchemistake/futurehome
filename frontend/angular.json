@@ -18,9 +18,15 @@
             "polyfills": "src/polyfills.ts",
             "assets": [
               "src/assets",
-              "src/favicon.ico"
+              "src/favicon.ico",
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
+                "output": "/assets/"
+              }
             ],
             "styles": [
+              "src/theme.less",
               "src/styles.scss"
             ],
             "scripts": []
@@ -117,7 +123,7 @@
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "app",
-      "styleext": "css"
+      "styleext": "scss"
     },
     "@schematics/angular:directive": {
       "prefix": "app"
