@@ -1,5 +1,5 @@
 import {Tweet} from "./tweet";
 
-export interface FetchTweetsResponse {
+export interface ListTweetsResponse {
   tweets: Tweet[];
 }

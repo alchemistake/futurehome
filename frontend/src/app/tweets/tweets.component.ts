@@ -17,14 +17,27 @@ export interface Data {
 })
 export class TweetsComponent implements OnInit {
   tweets: Tweet[] = [];
-   mapOfExpandData: { [key: string]: boolean } = {};
+  mapOfExpandData: { [key: string]: boolean } = {};
+  isLoading = false;
 
   constructor(private _api: ApiService) {
   }
 
   ngOnInit(): void {
+    this.getAllTweets();
+  }
+
+  getAllTweets(): void {
+    this._api.getAllTweets().subscribe(tweets => {
+      this.tweets = tweets;
+    });
+  }
+
+  fetchTweets(): void {
+    this.isLoading = true;
     this._api.fetchTweets().subscribe(tweets => {
       this.tweets = tweets;
+      this.isLoading = false;
     });
   }
 

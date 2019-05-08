@@ -13,6 +13,11 @@ from .serializers import TweetInteractionSerializer
 
 
 class TweetAPIView(APIView):
+    def get(self, request):
+        return Response({'tweets': Tweet.objects.values()})
+
+
+class FetchAPIView(APIView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.tweet_collector = TweetCollector.get_instance()

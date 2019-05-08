@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {map} from "rxjs/operators";
 import {Observable} from "rxjs";
-import {DashboardData, FetchTweetsResponse, Tweet} from "../entity";
+import {DashboardData, ListTweetsResponse, Tweet} from "../entity";
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +12,12 @@ export class ApiService {
   constructor(private _http: HttpClient) {
   }
 
+  public getAllTweets(): Observable<Tweet[]> {
+    return this._http.get<ListTweetsResponse>('/api/fetch/').pipe(map((resp: any) => resp.tweets));
+  }
+
   public fetchTweets(): Observable<Tweet[]> {
-    return this._http.get<FetchTweetsResponse>('/api/tweet/').pipe(map((resp: any) => resp.tweets));
+    return this._http.get<ListTweetsResponse>('/api/fetch/').pipe(map((resp: any) => resp.tweets));
   }
 
   public getDashboardData(): Observable<DashboardData> {

@@ -1,8 +1,11 @@
 .tweets-container {
-  .not-active {
-    pointer-events: none;
-    cursor: default;
-    text-decoration: none;
-    color: black;
+  .title {
+    display: inline;
+    margin-bottom: 1rem;
+  }
+
+  .fetch-button {
+    float: right;
+    margin-bottom: 1rem;
   }
 }

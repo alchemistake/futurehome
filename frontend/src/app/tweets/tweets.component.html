@@ -1,4 +1,9 @@
 <div class="tweets-container">
+  <h2 class="title">Tweets About Futurehome AS</h2>
+  <button nz-button nzType="default" class="fetch-button" [nzLoading]="isLoading" (click)="fetchTweets()">
+    <i nz-icon type="download"></i> Fetch Tweets
+  </button>
+
   <nz-table #tweetTable [nzData]="tweets">
     <thead>
     <tr>
@@ -15,9 +20,9 @@
         <td>{{ data.text }}</td>
         <td>@{{ data.user }}</td>
         <td>
-          <a (click)="retweet(data.id)" [class.not-active]="data.retweeted">Retweet</a>
+          <a (click)="retweet(data.id)">Retweet</a>
           <nz-divider nzType="vertical"></nz-divider>
-          <a (click)="favorite(data.id)" [class.not-active]="data.favorited">Favorite</a>
+          <a (click)="favorite(data.id)">Favorite</a>
         </td>
       </tr>
       <tr [nzExpand]="mapOfExpandData[data.id]">
