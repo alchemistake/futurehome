@@ -1,4 +1,36 @@
 <div class="dashboard-container">
-  <h2>Welcome!</h2>
-  {{data}}
+  <h2 class="title">Welcome to Futurehome AS Twitter Crawler!</h2>
+
+  <div class="bar-chart-container">
+    <canvas baseChart
+            [datasets]="barChartData"
+            [labels]="barChartLabels"
+            [options]="barChartOptions"
+            [legend]="true"
+            [chartType]="'bar'">
+    </canvas>
+  </div>
+
+  <div class="pie-chart-container">
+    <canvas baseChart
+            [data]="pieChartData"
+            [labels]="pieChartLabels"
+            [options]="pieChartOptions"
+            [chartType]="'pie'"
+            [legend]="true">
+    </canvas>
+  </div>
+
+  <div class="most-popular-tweets">
+    <h3 class="most-popular-title">Most Popular Tweets</h3>
+    <div *ngIf="data && data.mostPopularTweets.length > 0">
+      <div nz-row [nzGutter]="24">
+        <div nz-col [nzSpan]="8" class="card" *ngFor="let tweet of data.mostPopularTweets">
+          <nz-card nzTitle="@{{tweet.user}}:">
+            <p>{{tweet.text}}</p>
+          </nz-card>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

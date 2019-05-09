@@ -1,7 +1,17 @@
 import {Tweet} from "./tweet";
 
+export interface Language {
+  lang: string
+  'lang__count': number;
+}
+
+export interface Location {
+  place: string;
+  'place__count': number;
+}
+
 export interface DashboardData {
-  languages: { lang: string, 'lang__count': number }[];
-  locations: { place: string, 'place__count': number }[];
+  languages: Language[];
+  locations: Location[];
   mostPopularTweets: Tweet[];
 }

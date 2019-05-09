@@ -44,7 +44,7 @@ class DashboardAPIView(APIView):
         locations = Tweet.objects.values('place').order_by().annotate(Count('place'))
         languages = Tweet.objects.values('lang').order_by().annotate(Count('lang'))
         most_popular_tweets = Tweet.objects.values().annotate(
-            popularity=F('retweet_count') + F('favorite_count')).order_by('popularity')[:5]
+            popularity=F('retweet_count') + F('favorite_count')).order_by('popularity')[:6]
 
         return Response(
             {'locations': locations, 'languages': languages, 'mostPopularTweets': most_popular_tweets})

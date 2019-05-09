@@ -1,0 +1,22 @@
+.dashboard-container {
+  .title {
+    margin-bottom: 1.5rem;
+  }
+
+  .bar-chart-container, .pie-chart-container {
+    display: inline-block;
+    width: 50%;
+  }
+
+  .most-popular-tweets {
+    margin-top: 2rem;
+
+    .most-popular-title {
+      margin-bottom: 1rem;
+    }
+
+    .card {
+      margin-bottom: 1rem;
+    }
+  }
+}
