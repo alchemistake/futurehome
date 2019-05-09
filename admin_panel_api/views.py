@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admin_panel_api.auth import CsrfExemptSessionAuthentication
-from .collector import TweetCollector
+from futurehome_twitter_crawler.collector import TweetCollector
 from .models import Tweet
 from .serializers import TweetInteractionSerializer
 
@@ -23,20 +23,23 @@ class FetchAPIView(APIView):
         self.tweet_collector = TweetCollector.get_instance()
 
     def get(self, request):
-        tweets = self.tweet_collector.get_tweets()
+        try:
+            tweets = self.tweet_collector.get_tweets()
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            for tweet in tweets:
+                row = Tweet(id=tweet['id_str'],
+                            text=tweet['text'],
+                            lang=tweet['lang'],
+                            retweet_count=tweet['retweet_count'],
+                            favorite_count=tweet['favorite_count'],
+                            created_at=datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S +0000 %Y'),
+                            place=getattr(tweet['place'], 'country', None),
+                            user=tweet['user']['screen_name'])
+                row.save()
 
-        for tweet in tweets:
-            row = Tweet(id=tweet['id_str'],
-                        text=tweet['text'],
-                        lang=tweet['lang'],
-                        retweet_count=tweet['retweet_count'],
-                        favorite_count=tweet['favorite_count'],
-                        created_at=datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S +0000 %Y'),
-                        place=getattr(tweet['place'], 'country', None),
-                        user=tweet['user']['screen_name'])
-            row.save()
-
-        return Response({'tweets': Tweet.objects.values()})
+            return Response({'tweets': Tweet.objects.values()})
 
 
 class DashboardAPIView(APIView):
@@ -61,8 +64,12 @@ class RetweetAPIView(APIView):
         serializer = TweetInteractionSerializer(data=request.data)
 
         if serializer.is_valid():
-            self.tweet_collector.retweet(request.data['id'])
-            return Response(status=status.HTTP_200_OK)
+            try:
+                self.tweet_collector.retweet(request.data['id'])
+            except Exception as e:
+                return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                return Response(status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -78,7 +85,11 @@ class FavoriteAPIView(APIView):
         serializer = TweetInteractionSerializer(data=request.data)
 
         if serializer.is_valid():
-            self.tweet_collector.favorite(request.data['id'])
-            return Response(status=status.HTTP_200_OK)
+            try:
+                self.tweet_collector.favorite(request.data['id'])
+            except Exception as e:
+                return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                return Response(status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

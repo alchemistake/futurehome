@@ -35,10 +35,13 @@ export class TweetsComponent implements OnInit {
 
   fetchTweets(): void {
     this.isLoading = true;
+
     this._api.fetchTweets().subscribe(tweets => {
-      this.tweets = tweets;
-      this.isLoading = false;
-    });
+        this.tweets = tweets;
+        this.isLoading = false;
+      }, err => this.isLoading = false,
+      () => this.isLoading = false
+    );
   }
 
   retweet(id: string): void {
