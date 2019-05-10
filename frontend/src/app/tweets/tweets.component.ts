@@ -2,14 +2,6 @@ import {Component, OnInit} from '@angular/core';
 import {ApiService} from "../services/api.service";
 import {Tweet} from "../entity";
 
-export interface Data {
-  id: number;
-  name: string;
-  age: number;
-  address: string;
-  disabled: boolean;
-}
-
 @Component({
   selector: 'app-tweets',
   templateUrl: './tweets.component.html',
@@ -45,11 +37,11 @@ export class TweetsComponent implements OnInit {
   }
 
   retweet(id: string): void {
-    this._api.retweet(id).subscribe()
+    this._api.retweet(id).subscribe();
   }
 
   favorite(id: string): void {
-    this._api.favorite(id).subscribe()
+    this._api.favorite(id).subscribe();
   }
 
 }

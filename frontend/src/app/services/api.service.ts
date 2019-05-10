@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {catchError, map} from "rxjs/operators";
-import {from, Observable} from "rxjs";
+import {EMPTY, from, Observable} from "rxjs";
 import {DashboardData, ListTweetsResponse, Tweet} from "../entity";
 import {NzMessageService} from "ng-zorro-antd";
 
@@ -25,7 +25,8 @@ export class ApiService {
   }
 
   public fetchTweets(): Observable<Tweet[]> {
-    return this._http.get<ListTweetsResponse>('/api/fetch/').pipe(map((resp: any) => resp.tweets),
+    return this._http.get<ListTweetsResponse>('/api/fetch/').pipe(
+      map((resp: any) => resp.tweets),
       catchError(err => {
         this._message.error(err.error);
         return from([]);
@@ -36,20 +37,20 @@ export class ApiService {
     return this._http.get<DashboardData>('/api/dashboard/');
   }
 
-  public retweet(id: string): Observable<any> {
+  public retweet(id: string): Observable<Object> {
     return this._http.post('/api/retweet/', {id}).pipe(
       catchError(err => {
         this._message.error(err.error);
-        return from(null);
+        return EMPTY;
       })
     );
   }
 
-  public favorite(id: string): Observable<any> {
+  public favorite(id: string): Observable<Object> {
     return this._http.post('/api/favorite/', {id}).pipe(
       catchError(err => {
         this._message.error(err.error);
-        return from(null);
+        return EMPTY;
       })
     );
   }
