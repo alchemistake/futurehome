@@ -28,6 +28,7 @@ export class DashboardComponent implements OnInit {
     title: {display: true, position: 'top', text: 'Language of Tweets'},
     legend: {position: 'bottom'},
   };
+  pieChartColors = [{backgroundColor: ['rgba(63,184,175,0.6)', 'rgba(127,199,175,0.6)', 'rgba(255,108,149,0.6)', 'rgba(255,61,127,0.6)', 'rgba(218,216,167,0.6)']}];
   pieChartLabels: Label[] = [];
   pieChartData: number[] = [];
 
