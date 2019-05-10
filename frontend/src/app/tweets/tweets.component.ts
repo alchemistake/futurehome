@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {ApiService} from "../services/api.service";
-import {Tweet} from "../entity";
+import {ApiService} from '../services/api.service';
+import {Tweet} from '../entity';
 
 @Component({
   selector: 'app-tweets',
@@ -8,8 +8,11 @@ import {Tweet} from "../entity";
   styleUrls: ['./tweets.component.scss']
 })
 export class TweetsComponent implements OnInit {
-  tweets: Tweet[] = [];
+  allTweets: Tweet[] = [];
+  filteredTweets: Tweet[] = [];
+
   mapOfExpandData: { [key: string]: boolean } = {};
+  searchValue = '';
   isLoading = false;
 
   constructor(private _api: ApiService) {
@@ -21,7 +24,8 @@ export class TweetsComponent implements OnInit {
 
   getAllTweets(): void {
     this._api.getAllTweets().subscribe(tweets => {
-      this.tweets = tweets;
+      this.allTweets = tweets;
+      this.filteredTweets = this.allTweets;
     });
   }
 
@@ -29,9 +33,10 @@ export class TweetsComponent implements OnInit {
     this.isLoading = true;
 
     this._api.fetchTweets().subscribe(tweets => {
-        this.tweets = tweets;
+        this.allTweets = tweets;
+        this.filteredTweets = this.allTweets;
         this.isLoading = false;
-      }, err => this.isLoading = false,
+      }, () => this.isLoading = false,
       () => this.isLoading = false
     );
   }
@@ -42,6 +47,21 @@ export class TweetsComponent implements OnInit {
 
   favorite(id: string): void {
     this._api.favorite(id).subscribe();
+  }
+
+  search() {
+    const searchStr = this.searchValue.toLowerCase();
+
+    this.filteredTweets = this.allTweets.filter(t => {
+      return t.text.toLowerCase().includes(searchStr) || t.user.toLowerCase().includes(searchStr);
+    });
+
+    this.searchValue = '';
+  }
+
+  reset() {
+    this.filteredTweets = this.allTweets;
+    this.searchValue = '';
   }
 
 }

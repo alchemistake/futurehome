@@ -4,11 +4,28 @@
     <i nz-icon type="download"></i> Fetch Tweets
   </button>
 
-  <nz-table #tweetTable [nzData]="tweets">
+  <nz-table #tweetTable [nzData]="filteredTweets">
     <thead>
     <tr>
       <th nzShowExpand></th>
-      <th>Tweet</th>
+      <th nzCustomFilter>
+        Tweet
+        <nz-dropdown nzTrigger="click" nzPlacement="bottomRight" [nzClickHide]="true" nzTableFilter #dropdown>
+          <i nz-icon
+             nzType="search"
+             class="ant-table-filter-icon"
+             [class.ant-table-filter-open]="dropdown.nzVisible"
+             nz-dropdown>
+          </i>
+          <div class="search-box">
+            <input type="text" nz-input placeholder="Search name" [(ngModel)]="searchValue"/>
+            <button nz-button nzSize="small" nzType="primary" (click)="search()" class="search-button">
+              Search
+            </button>
+            <button nz-button nzSize="small" (click)="reset()">Reset</button>
+          </div>
+        </nz-dropdown>
+      </th>
       <th>User</th>
       <th>Actions</th>
     </tr>

@@ -12,6 +12,7 @@ import {DashboardComponent} from '../dashboard/dashboard.component';
 import {TweetsComponent} from '../tweets/tweets.component';
 
 import {NavbarComponent} from './navbar.component';
+import {FormsModule} from '@angular/forms';
 
 describe('NavbarComponent', () => {
   let component: NavbarComponent;
@@ -27,6 +28,7 @@ describe('NavbarComponent', () => {
       imports: [
         NgZorroAntdModule,
         ChartsModule,
+        FormsModule,
         HttpClientTestingModule,
         RouterTestingModule.withRoutes(appRoutes)
       ],

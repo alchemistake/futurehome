@@ -1,4 +1,4 @@
-import {Location} from "@angular/common";
+import {Location} from '@angular/common';
 import {async, TestBed} from '@angular/core/testing';
 import {Router} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -9,6 +9,7 @@ import {appRoutes} from './app.routes';
 import {DashboardComponent} from './dashboard/dashboard.component';
 import {NavbarComponent} from './navbar/navbar.component';
 import {TweetsComponent} from './tweets/tweets.component';
+import {FormsModule} from '@angular/forms';
 
 
 describe('AppComponent', () => {
@@ -19,6 +20,7 @@ describe('AppComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule.withRoutes(appRoutes),
+        FormsModule,
         NgZorroAntdModule,
         ChartsModule
       ],
@@ -43,6 +45,6 @@ describe('AppComponent', () => {
   }));
 
   it('should navigate to dashboard first', () => {
-    expect(location.path()).toBe("/dashboard");
+    expect(location.path()).toBe('/dashboard');
   });
 });
