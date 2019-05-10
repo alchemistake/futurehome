@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admin_panel_api.auth import CsrfExemptSessionAuthentication
-from futurehome_twitter_crawler.collector import TweetCollector
+from admin_panel_api.collector import TweetCollector
 from .models import Tweet
 from .serializers import TweetInteractionSerializer
 
@@ -28,6 +28,8 @@ class FetchAPIView(APIView):
         except Exception as e:
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
+            Tweet.objects.all().delete()
+
             for tweet in tweets:
                 row = Tweet(id=tweet['id_str'],
                             text=tweet['text'],
