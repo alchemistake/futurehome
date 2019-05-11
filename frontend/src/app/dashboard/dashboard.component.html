@@ -27,7 +27,7 @@
     <div *ngIf="data && data.mostPopularTweets.length > 0">
       <div nz-row [nzGutter]="24">
         <div nz-col [nzSpan]="8" class="card" *ngFor="let tweet of data.mostPopularTweets">
-          <nz-card nzTitle="@{{tweet.user}}:">
+          <nz-card nzTitle="@{{tweet.user}}:" [nzBodyStyle]="{'max-height': '6rem', 'overflow': 'auto'}">
             <p>{{tweet.text}}</p>
           </nz-card>
         </div>

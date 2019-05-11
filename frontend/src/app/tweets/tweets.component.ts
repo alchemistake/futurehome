@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../services/api.service';
 import {Tweet} from '../entity';
+import {HttpClient} from "@angular/common/http";
+import {NzMessageService} from "ng-zorro-antd";
 
 @Component({
   selector: 'app-tweets',
@@ -15,7 +17,8 @@ export class TweetsComponent implements OnInit {
   searchValue = '';
   isLoading = false;
 
-  constructor(private _api: ApiService) {
+  constructor(private _api: ApiService,
+              private _message: NzMessageService) {
   }
 
   ngOnInit(): void {
@@ -42,11 +45,15 @@ export class TweetsComponent implements OnInit {
   }
 
   retweet(id: string): void {
-    this._api.retweet(id).subscribe();
+    this._api.retweet(id).subscribe(() => {
+      this._message.success('Retweet successful');
+    });
   }
 
   favorite(id: string): void {
-    this._api.favorite(id).subscribe();
+    this._api.favorite(id).subscribe(() => {
+      this._message.success('Favorite successful');
+    });
   }
 
   search() {

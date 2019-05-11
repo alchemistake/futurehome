@@ -1,6 +1,6 @@
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {NgZorroAntdModule} from 'ng-zorro-antd';
+import {NgZorroAntdModule, NzMessageService} from 'ng-zorro-antd';
 import {EMPTY, of, throwError} from 'rxjs';
 import {ListTweetsResponse, Tweet} from '../entity';
 import {ApiService} from '../services/api.service';
@@ -17,7 +17,7 @@ describe('TweetsComponent', () => {
     TestBed.configureTestingModule({
       imports: [FormsModule, HttpClientTestingModule, NgZorroAntdModule],
       declarations: [TweetsComponent],
-      providers: [ApiService]
+      providers: [ApiService, NzMessageService]
     })
       .compileComponents();
   }));
