@@ -3,7 +3,7 @@ from django.db import models
 
 class Tweet(models.Model):
     id = models.CharField(max_length=140, primary_key=True)
-    text = models.CharField(max_length=255)
+    text = models.CharField(max_length=255, default='')
     lang = models.CharField(max_length=5, default='')
     retweet_count = models.IntegerField(default=0)
     favorite_count = models.IntegerField(default=0)

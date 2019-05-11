@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from twython import TwythonError
 
-from admin_panel_api.collector import TweetCollector
+from admin_panel_api.twitter_interface import TwitterInterface
 from admin_panel_api.models import Tweet
 
 
@@ -31,7 +31,7 @@ class ViewTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(str(response.data), str({'tweets': Tweet.objects.values()}))
 
-    @patch('admin_panel_api.collector.TweetCollector.get_tweets', return_value=mock_get_tweets_response)
+    @patch('admin_panel_api.twitter_interface.TwitterInterface.get_tweets', return_value=mock_get_tweets_response)
     def test_fetch_success(self, mock_get_tweets):
         response = self.client.get('/api/fetch/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -40,10 +40,11 @@ class ViewTests(TestCase):
         self.assertEqual(response.data['tweets'][0]['id'], '2')
         self.assertEqual(Tweet.objects.values()[0]['id'], '2')
 
-    @patch('admin_panel_api.collector.TweetCollector.get_tweets', side_effect=Exception('Some error'))
+    @patch('admin_panel_api.twitter_interface.TwitterInterface.get_tweets',
+           return_value={"status_code": 500, "message": "Internal Server Error"})
     def test_fetch_error(self, mock_get_tweets):
         response = self.client.get('/api/fetch/')
-        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertNotEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Tweet.objects.values()[0]['id'], '1')  # Database should be unchanged
 
     def test_dashboard(self):
@@ -57,80 +58,82 @@ class ViewTests(TestCase):
         self.assertEqual(response.data['mostPopularTweets'][0]['popularity'], 2)
         self.assertEqual(response.data['mostPopularTweets'][0]['id'], '1')
 
-    @patch('admin_panel_api.collector.TweetCollector.retweet', return_value={})
+    @patch('admin_panel_api.twitter_interface.TwitterInterface.retweet', return_value={})
     def test_retweet_correct_request(self, mock_retweet):
         response = self.client.post('/api/retweet/', {'id': '1'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    @patch('admin_panel_api.collector.TweetCollector.retweet', return_value={})
+    @patch('admin_panel_api.twitter_interface.TwitterInterface.retweet', return_value={})
     def test_retweet_incorrect_request(self, mock_retweet):
         response = self.client.post('/api/retweet/', {'idx': '1'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @patch('admin_panel_api.collector.TweetCollector.retweet', side_effect=Exception('Some error'))
+    @patch('admin_panel_api.twitter_interface.TwitterInterface.retweet',
+           return_value={"status_code": 500, "message": "Internal Server Error"})
     def test_retweet_twython_error(self, mock_retweet):
         response = self.client.post('/api/retweet/', {'id': '1'})
-        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertNotEqual(response.status_code, status.HTTP_200_OK)
 
-    @patch('admin_panel_api.collector.TweetCollector.favorite', return_value={})
+    @patch('admin_panel_api.twitter_interface.TwitterInterface.favorite', return_value={})
     def test_favorite_correct_request(self, mock_favorite):
         response = self.client.post('/api/favorite/', {'id': '1'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    @patch('admin_panel_api.collector.TweetCollector.favorite', return_value={})
+    @patch('admin_panel_api.twitter_interface.TwitterInterface.favorite', return_value={})
     def test_favorite_incorrect_request(self, mock_favorite):
         response = self.client.post('/api/favorite/', {'idx': '1'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @patch('admin_panel_api.collector.TweetCollector.favorite', side_effect=Exception('Some error'))
+    @patch('admin_panel_api.twitter_interface.TwitterInterface.favorite',
+           return_value={"status_code": 500, "message": "Internal Server Error"})
     def test_favorite_twython_error(self, mock_favorite):
         response = self.client.post('/api/favorite/', {'id': '1'})
-        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertNotEqual(response.status_code, status.HTTP_200_OK)
 
 
-class TweetCollectorTests(TestCase):
-    @patch('admin_panel_api.collector.Twython', return_value={})
+class TwitterInterfaceTests(TestCase):
+    @patch('admin_panel_api.twitter_interface.Twython', return_value={})
     def test_singleton(self, mock_twython_init):
-        instance1 = TweetCollector.get_instance()
-        instance2 = TweetCollector.get_instance()
+        instance1 = TwitterInterface.get_instance()
+        instance2 = TwitterInterface.get_instance()
         self.assertIsNotNone(instance1)
         self.assertEqual(instance1, instance2)  # Singleton
 
     def test_get_tweets_success(self):
-        with patch('admin_panel_api.collector.Twython.search') as mock_search:
+        with patch('admin_panel_api.twitter_interface.Twython.search') as mock_search:
             test_result = {'statuses': []}
             mock_search.return_value = test_result
 
-            tweets = TweetCollector.get_instance().get_tweets()
+            tweets = TwitterInterface.get_instance().get_tweets()
             self.assertEqual(tweets, test_result['statuses'])
 
-    @patch('admin_panel_api.collector.Twython.search', side_effect=TwythonError('Some error'))
+    @patch('admin_panel_api.twitter_interface.Twython.search', side_effect=TwythonError('Some error'))
     def test_get_tweets_error(self, mock_search):
         try:
-            TweetCollector.get_instance().get_tweets()
+            TwitterInterface.get_instance().get_tweets()
         except Exception as e:
             self.assertIsNotNone(e)
 
-    @patch('admin_panel_api.collector.Twython.retweet', return_value=True)
+    @patch('admin_panel_api.twitter_interface.Twython.retweet', return_value=True)
     def test_retweet_success(self, mock_retweet):
-        TweetCollector.get_instance().retweet('1234')
+        TwitterInterface.get_instance().retweet('1234')
         self.assertEqual(mock_retweet.call_count, 1)
 
-    @patch('admin_panel_api.collector.Twython.retweet', side_effect=TwythonError('Some error'))
+    @patch('admin_panel_api.twitter_interface.Twython.retweet', side_effect=TwythonError('Some error'))
     def test_retweet_error(self, mock_retweet):
         try:
-            TweetCollector.get_instance().retweet('1234')
+            TwitterInterface.get_instance().retweet('1234')
         except Exception as e:
             self.assertIsNotNone(e)
 
-    @patch('admin_panel_api.collector.Twython.create_favorite', return_value=True)
+    @patch('admin_panel_api.twitter_interface.Twython.create_favorite', return_value=True)
     def test_favorite_success(self, mock_favorite):
-        TweetCollector.get_instance().favorite('1234')
+        TwitterInterface.get_instance().favorite('1234')
         self.assertEqual(mock_favorite.call_count, 1)
 
-    @patch('admin_panel_api.collector.Twython.create_favorite', side_effect=TwythonError('Some error'))
+    @patch('admin_panel_api.twitter_interface.Twython.create_favorite', side_effect=TwythonError('Some error'))
     def test_favorite_error(self, mock_favorite):
         try:
-            TweetCollector.get_instance().favorite('1234')
+            TwitterInterface.get_instance().favorite('1234')
         except Exception as e:
             self.assertIsNotNone(e)

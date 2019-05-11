@@ -2,12 +2,11 @@ from datetime import datetime
 
 from django.db.models import Count, F
 from rest_framework import status
-from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.views.decorators.csrf import csrf_exempt
 
-from admin_panel_api.auth import CsrfExemptSessionAuthentication
-from admin_panel_api.collector import TweetCollector
+from admin_panel_api.twitter_interface import TwitterInterface
 from .models import Tweet
 from .serializers import TweetInteractionSerializer
 
@@ -20,28 +19,28 @@ class TweetAPIView(APIView):
 class FetchAPIView(APIView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.tweet_collector = TweetCollector.get_instance()
+        self.tweet_collector = TwitterInterface.get_instance()
 
     def get(self, request):
-        try:
-            tweets = self.tweet_collector.get_tweets()
-        except Exception as e:
-            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            Tweet.objects.all().delete()
+        tweets = self.tweet_collector.get_tweets()
 
-            for tweet in tweets:
-                row = Tweet(id=tweet['id_str'],
-                            text=tweet['text'],
-                            lang=tweet['lang'],
-                            retweet_count=tweet['retweet_count'],
-                            favorite_count=tweet['favorite_count'],
-                            created_at=datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S +0000 %Y'),
-                            place=getattr(tweet['place'], 'country', None),
-                            user=tweet['user']['screen_name'])
-                row.save()
+        if type(tweets) is not list:
+            return Response(str(tweets["message"]), status=tweets["status_code"])
 
-            return Response({'tweets': Tweet.objects.values()})
+        # Tweet.objects.all().delete()
+
+        for tweet in tweets:
+            row = Tweet(id=tweet['id_str'],
+                        text=tweet['text'],
+                        lang=tweet['lang'],
+                        retweet_count=tweet['retweet_count'],
+                        favorite_count=tweet['favorite_count'],
+                        created_at=datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S +0000 %Y'),
+                        place=getattr(tweet['place'], 'country', None),
+                        user=tweet['user']['screen_name'])
+            row.save()
+
+        return Response({'tweets': Tweet.objects.values()})
 
 
 class DashboardAPIView(APIView):
@@ -56,20 +55,18 @@ class DashboardAPIView(APIView):
 
 
 class RetweetAPIView(APIView):
-    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.tweet_collector = TweetCollector.get_instance()
+        self.tweet_collector = TwitterInterface.get_instance()
 
+    @csrf_exempt
     def post(self, request):
         serializer = TweetInteractionSerializer(data=request.data)
 
         if serializer.is_valid():
-            try:
-                self.tweet_collector.retweet(request.data['id'])
-            except Exception as e:
-                return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            error = self.tweet_collector.retweet(request.data['id'])
+            if error:
+                return Response(str(error["message"]), status=error["status_code"])
             else:
                 return Response(status=status.HTTP_200_OK)
         else:
@@ -77,20 +74,18 @@ class RetweetAPIView(APIView):
 
 
 class FavoriteAPIView(APIView):
-    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.tweet_collector = TweetCollector.get_instance()
+        self.tweet_collector = TwitterInterface.get_instance()
 
+    @csrf_exempt
     def post(self, request):
         serializer = TweetInteractionSerializer(data=request.data)
 
         if serializer.is_valid():
-            try:
-                self.tweet_collector.favorite(request.data['id'])
-            except Exception as e:
-                return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            error = self.tweet_collector.favorite(request.data['id'])
+            if error:
+                return Response(str(error["message"]), status=error["status_code"])
             else:
                 return Response(status=status.HTTP_200_OK)
         else:
