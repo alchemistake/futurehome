@@ -24,7 +24,7 @@ SECRET_KEY = '^1n=j7u#i@*d60p08dn88jsq^q)q9l%i@y)9e*3kj(y!oi+=ye'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['futurehome-twitter-crawler.herokuapp.com']
 
 # Application definition
 
